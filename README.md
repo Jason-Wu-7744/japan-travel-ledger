@@ -45,6 +45,7 @@
 - **保存前确认**：识别结果可编辑，确认后才写入账本
 - **手动分类**：餐饮、购物、交通、其他，避免关键词误判
 - **分类统计**：总花费、分类花费、消费笔数与分类小计
+- **按天管理**：可按日期查看每天的消费笔数、当日合计和账目明细
 - **CSV 导出**：通过 Android 系统文件选择器保存，无需通用存储权限
 - **本地优先**：无账号、无广告、无统计 SDK、无账目服务器
 - **设备适配**：Android 8.0+，兼容状态栏、底部导航栏和居中挖孔安全区域
@@ -68,8 +69,14 @@
       <strong>本地解析 · 保存前确认</strong>
     </td>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-28-07-810_com.japanledger.app.jpg" width="320" alt="旅账管理页展示寿司郎、咖啡、饮料等日本旅行消费及餐饮购物交通分类金额" /><br />
-      <strong>分类统计 · CSV 导出</strong>
+      <img src="demo/Screenshot_2026-08-21-16-45-06-090_com.japanledger.app.jpg" width="320" alt="旅账按类别管理页面展示餐饮购物交通其他的分类金额、笔数与明细" /><br />
+      <strong>按类别 · 分类统计</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="demo/Screenshot_2026-08-21-16-44-59-004_com.japanledger.app.jpg" width="320" alt="旅账按天管理页面展示今天的消费笔数、当日合计与账目明细" /><br />
+      <strong>按天管理 · 当日合计</strong>
     </td>
   </tr>
 </table>
@@ -179,7 +186,7 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## 版本与发布
 
-- 当前版本：**2.1.0**
+- 当前版本：**2.1.1**
 - [下载所有 APK 版本](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
 - [完整更新记录](CHANGELOG.md)
 - [各版本发布说明](docs/releases)
@@ -199,6 +206,7 @@ app/build/outputs/apk/debug/app-debug.apk
 - No account, cloud backend, ads, analytics SDK, or expense upload
 - Manual categories: Food, Shopping, Transport, and Other
 - Total spending, category totals, counts, and grouped records
+- Category and daily management views with per-day spending totals
 - CSV export for Excel, Numbers, Google Sheets, Python, or reimbursement workflows
 - Android 8.0+ and center punch-hole display support
 - Tested and adjusted for Xiaomi 14 Pro / HyperOS 3

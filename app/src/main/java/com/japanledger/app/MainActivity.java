@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -70,6 +71,7 @@ public class MainActivity extends Activity {
     private Screen currentScreen = Screen.HOME;
     private final DecimalFormat amountFormat = new DecimalFormat("#,##0.##");
     private List<Record> pendingExportRecords;
+    private boolean manageByDay;
 
     private enum Screen { HOME, ENTRY, MANAGE }
 
@@ -270,6 +272,8 @@ public class MainActivity extends Activity {
             return;
         }
 
+        addManageGroupingSwitch();
+
         Button export = button("导出 CSV  ↓", MINT, INK, 16, 17);
         LinearLayout.LayoutParams exportParams = lpMatch(dp(54));
         exportParams.setMargins(0, 0, 0, dp(12));
@@ -285,6 +289,10 @@ public class MainActivity extends Activity {
         page.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
         addCategorySummary(list, records);
+        if (manageByDay) {
+            addDailySections(list, records);
+            return;
+        }
         List<String> sections = new ArrayList<>();
         Collections.addAll(sections, CATEGORIES);
         sections.add("未分类");
@@ -301,6 +309,83 @@ public class MainActivity extends Activity {
             list.addView(categoryHeader(category, categoryRecords.size(), subtotal));
             for (Record record : categoryRecords) list.addView(recordCard(record));
         }
+    }
+
+    private void addManageGroupingSwitch() {
+        LinearLayout switcher = new LinearLayout(this);
+        switcher.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams switcherParams = lpMatch(dp(48));
+        switcherParams.setMargins(0, 0, 0, dp(10));
+        page.addView(switcher, switcherParams);
+
+        Button byCategory = button("按类别", manageByDay ? Color.WHITE : INK,
+                manageByDay ? MUTED : Color.WHITE, 14, 15);
+        LinearLayout.LayoutParams leftParams = new LinearLayout.LayoutParams(0, dp(48), 1);
+        leftParams.setMargins(0, 0, dp(4), 0);
+        switcher.addView(byCategory, leftParams);
+        byCategory.setOnClickListener(v -> {
+            if (manageByDay) {
+                manageByDay = false;
+                showManage();
+            }
+        });
+
+        Button byDay = button("按天", manageByDay ? INK : Color.WHITE,
+                manageByDay ? Color.WHITE : MUTED, 14, 15);
+        LinearLayout.LayoutParams rightParams = new LinearLayout.LayoutParams(0, dp(48), 1);
+        rightParams.setMargins(dp(4), 0, 0, 0);
+        switcher.addView(byDay, rightParams);
+        byDay.setOnClickListener(v -> {
+            if (!manageByDay) {
+                manageByDay = true;
+                showManage();
+            }
+        });
+    }
+
+    private void addDailySections(LinearLayout parent, List<Record> records) {
+        Map<String, List<Record>> recordsByDay = new LinkedHashMap<>();
+        SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        for (Record record : records) {
+            String key = keyFormat.format(new Date(record.createdAt));
+            if (!recordsByDay.containsKey(key)) recordsByDay.put(key, new ArrayList<>());
+            recordsByDay.get(key).add(record);
+        }
+
+        for (List<Record> dayRecords : recordsByDay.values()) {
+            double subtotal = 0;
+            for (Record record : dayRecords) subtotal += record.amount;
+            parent.addView(dayHeader(dayRecords.get(0).createdAt, dayRecords.size(), subtotal));
+            for (Record record : dayRecords) parent.addView(recordCard(record));
+        }
+    }
+
+    private View dayHeader(long timestamp, int count, double subtotal) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(2), dp(14), dp(2), dp(9));
+        TextView title = text(dayLabel(timestamp) + "  " + count + " 笔", 15, INK, true);
+        row.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        TextView total = text("当日 ¥" + amountFormat.format(subtotal), 13, MUTED, false);
+        row.addView(total);
+        return row;
+    }
+
+    private String dayLabel(long timestamp) {
+        Calendar target = Calendar.getInstance();
+        target.setTimeInMillis(timestamp);
+        Calendar today = Calendar.getInstance();
+        if (sameDay(target, today)) return "今天";
+        today.add(Calendar.DAY_OF_YEAR, -1);
+        if (sameDay(target, today)) return "昨天";
+        return new SimpleDateFormat("MM月dd日 EEE", Locale.CHINA).format(new Date(timestamp));
+    }
+
+    private boolean sameDay(Calendar first, Calendar second) {
+        return first.get(Calendar.ERA) == second.get(Calendar.ERA)
+                && first.get(Calendar.YEAR) == second.get(Calendar.YEAR)
+                && first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR);
     }
 
     private void addCategorySummary(LinearLayout parent, List<Record> records) {

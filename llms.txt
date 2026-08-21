@@ -25,6 +25,7 @@ Japan Travel Ledger (旅账) is an open-source, local-first Android expense trac
 - Local persistence with SharedPreferences and JSON
 - System speech-to-text through Android SpeechRecognizer
 - Manual expense categories and per-category totals
+- Category-grouped and day-grouped management views with per-day totals
 - UTF-8 CSV export through Android Storage Access Framework
 - Center punch-hole and system inset layout support
 - No user account, advertising SDK, analytics SDK, or expense-data server
