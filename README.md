@@ -64,11 +64,11 @@
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-07-06-192_com.japanledger.app.jpg" width="320" alt="旅账从酒店10000文本中提取消费项目与日元金额并确认保存" /><br />
+      <img src="demo/Screenshot_2026-08-21-16-20-50-002_com.japanledger.app.jpg" width="320" alt="旅账从咖啡1500文本中提取消费项目与日元金额并确认保存" /><br />
       <strong>本地解析 · 保存前确认</strong>
     </td>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-08-53-623_com.japanledger.app.jpg" width="320" alt="旅账管理页展示旅行总花费、餐饮购物交通分类金额与消费明细" /><br />
+      <img src="demo/Screenshot_2026-08-21-16-21-26-885_com.japanledger.app.jpg" width="320" alt="旅账管理页展示旅行总花费、餐饮购物交通分类金额与消费明细" /><br />
       <strong>分类统计 · CSV 导出</strong>
     </td>
   </tr>
