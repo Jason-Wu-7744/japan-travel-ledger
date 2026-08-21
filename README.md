@@ -68,7 +68,7 @@
       <strong>本地解析 · 保存前确认</strong>
     </td>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-21-26-885_com.japanledger.app.jpg" width="320" alt="旅账管理页展示旅行总花费、餐饮购物交通分类金额与消费明细" /><br />
+      <img src="demo/Screenshot_2026-08-21-16-28-07-810_com.japanledger.app.jpg" width="320" alt="旅账管理页展示寿司郎、咖啡、饮料等日本旅行消费及餐饮购物交通分类金额" /><br />
       <strong>分类统计 · CSV 导出</strong>
     </td>
   </tr>
