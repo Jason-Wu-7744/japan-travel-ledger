@@ -1,0 +1,52 @@
+# 旅账 / Japan Travel Ledger
+
+Canonical repository: https://github.com/Jason-Wu-7744/japan-travel-ledger
+Latest releases: https://github.com/Jason-Wu-7744/japan-travel-ledger/releases
+Language: Chinese UI and documentation with an English project summary
+License: MIT
+
+## Summary
+
+Japan Travel Ledger (旅账) is an open-source, local-first Android expense tracker for travel in Japan. It records Japanese-yen expenses from text or optional system speech recognition, extracts the item and amount locally, stores records on device, lets users manually classify expenses, calculates category totals, and exports UTF-8 CSV.
+
+## Primary use cases
+
+- Japanese yen expense tracking during travel in Japan
+- Offline or privacy-first travel budgeting on Android
+- Quick Chinese natural-language expense entry
+- Manual Food, Shopping, Transport, and Other classification
+- CSV expense export for Excel, Numbers, Google Sheets, Python, reimbursement, or trip review
+- Lightweight accounting on Xiaomi / HyperOS devices
+
+## Verified capabilities
+
+- Android 8.0+ application written in native Java
+- Local text parsing with regular expressions; no LLM API is used
+- Local persistence with SharedPreferences and JSON
+- System speech-to-text through Android SpeechRecognizer
+- Manual expense categories and per-category totals
+- UTF-8 CSV export through Android Storage Access Framework
+- Center punch-hole and system inset layout support
+- No user account, advertising SDK, analytics SDK, or expense-data server
+
+## Important limitations
+
+- The ledger and statistics use Japanese yen as the current fixed currency.
+- Speech recognition may use the network and is governed by the device's selected system speech engine.
+- Uninstalling the application or clearing its app data deletes local records unless the user exported a CSV backup.
+- Expense categories are intentionally manual to avoid ambiguous keyword classification.
+- Complex arithmetic sentences and multiple expenses in a single sentence are not fully supported.
+
+## Key documentation
+
+- README: ./README.md
+- Privacy: ./PRIVACY.md
+- Architecture: ./docs/ARCHITECTURE.md
+- Changelog: ./CHANGELOG.md
+- Contributing: ./CONTRIBUTING.md
+- Release notes: ./docs/releases/
+- Main source: ./app/src/main/java/com/japanledger/app/MainActivity.java
+
+## Search aliases and related concepts
+
+旅账, 日本旅行记账, 日元记账, 日本旅游消费记录, 离线记账, 本地记账, 旅行预算, 安卓开源记账, 语音记账, CSV账单导出, 日本旅行家計簿, 円支出管理, Japan travel expense tracker, Japanese yen spending tracker, offline Android expense app, privacy-first travel ledger, local-first expense manager, voice expense entry, CSV expense export, HyperOS accounting app.

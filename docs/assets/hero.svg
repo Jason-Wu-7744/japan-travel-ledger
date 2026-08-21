@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">旅账 Japan Travel Ledger</title>
+  <desc id="desc">Privacy-first offline Android expense tracker for travel in Japan</desc>
+  <rect width="1200" height="420" rx="32" fill="#17211b"/>
+  <circle cx="160" cy="210" r="96" fill="#b9e4cc"/>
+  <path d="M145 145h30v130h-30zM105 195h110v30H105z" fill="#17211b"/>
+  <text x="305" y="180" fill="#ffffff" font-size="74" font-weight="700" font-family="system-ui, -apple-system, sans-serif">旅账</text>
+  <text x="305" y="248" fill="#b9e4cc" font-size="46" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Japan Travel Ledger</text>
+  <text x="307" y="310" fill="#c6cec9" font-size="27" font-family="system-ui, -apple-system, sans-serif">Local-first · JPY expense tracking · Android · CSV export</text>
+</svg>
