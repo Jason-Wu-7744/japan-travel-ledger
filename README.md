@@ -49,6 +49,31 @@
 - **本地优先**：无账号、无广告、无统计 SDK、无账目服务器
 - **设备适配**：Android 8.0+，兼容状态栏、底部导航栏和居中挖孔安全区域
 
+## 界面预览
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="demo/Screenshot_2026-08-21-16-06-50-205_com.japanledger.app.jpg" width="320" alt="旅账 Japan Travel Ledger 极简首页，包含记账与管理两个入口" /><br />
+      <strong>极简首页 · 记账 / 管理</strong>
+    </td>
+    <td align="center" width="50%">
+      <img src="demo/Screenshot_2026-08-21-16-06-47-576_com.japanledger.app.jpg" width="320" alt="旅账文字和语音消费输入页面，支持日元金额提取" /><br />
+      <strong>文字与语音记账</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="demo/Screenshot_2026-08-21-16-07-06-192_com.japanledger.app.jpg" width="320" alt="旅账从酒店10000文本中提取消费项目与日元金额并确认保存" /><br />
+      <strong>本地解析 · 保存前确认</strong>
+    </td>
+    <td align="center" width="50%">
+      <img src="demo/Screenshot_2026-08-21-16-08-53-623_com.japanledger.app.jpg" width="320" alt="旅账管理页展示旅行总花费、餐饮购物交通分类金额与消费明细" /><br />
+      <strong>分类统计 · CSV 导出</strong>
+    </td>
+  </tr>
+</table>
+
 ## 三步开始使用
 
 1. 从 [GitHub Releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) 下载最新 APK 并安装。
