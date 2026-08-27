@@ -35,9 +35,13 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -53,7 +57,7 @@ import java.util.regex.Pattern;
 public class MainActivity extends Activity {
     private static final int MICROPHONE_PERMISSION_REQUEST = 25;
     private static final int EXPORT_CSV_REQUEST = 40;
-    private static final String[] CATEGORIES = {"餐饮", "购物", "交通", "其他"};
+    private static final String[] DEFAULT_CATEGORIES = {"餐饮", "购物", "交通", "其他"};
     private static final int INK = Color.rgb(23, 33, 27);
     private static final int PAPER = Color.rgb(245, 243, 237);
     private static final int MINT = Color.rgb(185, 228, 204);
@@ -61,6 +65,9 @@ public class MainActivity extends Activity {
     private static final int LINE = Color.rgb(222, 220, 213);
     private static final String PREFS = "travel_ledger";
     private static final String RECORDS_KEY = "records";
+    private static final String CATEGORIES_KEY = "categories";
+    private static final String JPY_TO_CNY_RATE_KEY = "jpy_to_cny_rate";
+    private static final String RATE_UPDATED_AT_KEY = "rate_updated_at";
     private static final String MANUAL_CATEGORY_MIGRATION_KEY = "manual_categories_v1";
 
     private LinearLayout page;
@@ -70,8 +77,10 @@ public class MainActivity extends Activity {
     private boolean listening;
     private Screen currentScreen = Screen.HOME;
     private final DecimalFormat amountFormat = new DecimalFormat("#,##0.##");
+    private final DecimalFormat rateFormat = new DecimalFormat("0.0000");
     private List<Record> pendingExportRecords;
     private boolean manageByDay;
+    private boolean exchangeLoading;
 
     private enum Screen { HOME, ENTRY, MANAGE }
 
@@ -107,6 +116,7 @@ public class MainActivity extends Activity {
         String item;
         String category;
         double amount;
+        String sourceCurrency;
     }
 
     @Override
@@ -241,6 +251,7 @@ public class MainActivity extends Activity {
         List<Record> records = loadRecords();
         double total = 0;
         for (Record record : records) total += record.amount;
+        double jpyToCnyRate = loadJpyToCnyRate();
 
         LinearLayout totalCard = new LinearLayout(this);
         totalCard.setOrientation(LinearLayout.VERTICAL);
@@ -256,6 +267,13 @@ public class MainActivity extends Activity {
         TextView totalValue = text("¥ " + amountFormat.format(total), 32, Color.WHITE, true);
         totalValue.setPadding(0, dp(5), 0, 0);
         totalCard.addView(totalValue);
+        TextView totalCny = text("约 RMB " + amountFormat.format(total * jpyToCnyRate), 14,
+                Color.rgb(195, 203, 197), false);
+        totalCny.setPadding(0, dp(4), 0, 0);
+        totalCard.addView(totalCny);
+
+        addExchangeRateCard(total, jpyToCnyRate);
+        addManageActions();
 
         if (records.isEmpty()) {
             Space spacer = new Space(this);
@@ -290,11 +308,10 @@ public class MainActivity extends Activity {
 
         addCategorySummary(list, records);
         if (manageByDay) {
-            addDailySections(list, records);
+            addDailySections(list, records, jpyToCnyRate);
             return;
         }
-        List<String> sections = new ArrayList<>();
-        Collections.addAll(sections, CATEGORIES);
+        List<String> sections = loadCategories();
         sections.add("未分类");
         for (String category : sections) {
             List<Record> categoryRecords = new ArrayList<>();
@@ -306,9 +323,66 @@ public class MainActivity extends Activity {
                 }
             }
             if (categoryRecords.isEmpty()) continue;
-            list.addView(categoryHeader(category, categoryRecords.size(), subtotal));
+            list.addView(categoryHeader(category, categoryRecords.size(), subtotal, jpyToCnyRate));
             for (Record record : categoryRecords) list.addView(recordCard(record));
         }
+    }
+
+    private void addExchangeRateCard(double total, double rate) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setPadding(dp(16), dp(10), dp(12), dp(10));
+        card.setBackground(roundRect(Color.WHITE, 18, LINE, 1));
+        LinearLayout.LayoutParams params = lpMatch(dp(74));
+        params.setMargins(0, 0, 0, dp(10));
+        page.addView(card, params);
+
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        card.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        TextView title = text("实时汇率  JPY → CNY", 13, INK, true);
+        words.addView(title);
+        TextView detail = text(rateStatus(rate, total), 12, MUTED, false);
+        detail.setPadding(0, dp(4), 0, 0);
+        words.addView(detail);
+
+        Button edit = button("手动", Color.rgb(248, 247, 243), INK, 13, 14);
+        card.addView(edit, new LinearLayout.LayoutParams(dp(68), dp(46)));
+        edit.setOnClickListener(v -> showRateDialog());
+        Button refresh = button(exchangeLoading ? "刷新中" : "刷新", MINT, INK, 13, 14);
+        LinearLayout.LayoutParams refreshParams = new LinearLayout.LayoutParams(dp(76), dp(46));
+        refreshParams.setMargins(dp(8), 0, 0, 0);
+        card.addView(refresh, refreshParams);
+        refresh.setEnabled(!exchangeLoading);
+        refresh.setOnClickListener(v -> refreshExchangeRate());
+    }
+
+    private String rateStatus(double rate, double total) {
+        long updatedAt = getSharedPreferences(PREFS, MODE_PRIVATE).getLong(RATE_UPDATED_AT_KEY, 0);
+        String source = updatedAt == 0 ? "默认估算" : new SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(new Date(updatedAt));
+        return "1 日元 ≈ " + rateFormat.format(rate) + " RMB · 合计约 " + amountFormat.format(total * rate)
+                + " RMB · " + source;
+    }
+
+    private void addManageActions() {
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams params = lpMatch(dp(52));
+        params.setMargins(0, 0, 0, dp(10));
+        page.addView(actions, params);
+
+        Button categories = button("管理分类", MINT, INK, 15, 16);
+        LinearLayout.LayoutParams left = new LinearLayout.LayoutParams(0, dp(52), 1);
+        left.setMargins(0, 0, dp(5), 0);
+        actions.addView(categories, left);
+        categories.setOnClickListener(v -> showCategoryManagerDialog());
+
+        Button add = button("记一笔", Color.WHITE, INK, 15, 16);
+        LinearLayout.LayoutParams right = new LinearLayout.LayoutParams(0, dp(52), 1);
+        right.setMargins(dp(5), 0, 0, 0);
+        actions.addView(add, right);
+        add.setOnClickListener(v -> showEntry());
     }
 
     private void addManageGroupingSwitch() {
@@ -343,7 +417,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void addDailySections(LinearLayout parent, List<Record> records) {
+    private void addDailySections(LinearLayout parent, List<Record> records, double rate) {
         Map<String, List<Record>> recordsByDay = new LinkedHashMap<>();
         SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         for (Record record : records) {
@@ -355,19 +429,20 @@ public class MainActivity extends Activity {
         for (List<Record> dayRecords : recordsByDay.values()) {
             double subtotal = 0;
             for (Record record : dayRecords) subtotal += record.amount;
-            parent.addView(dayHeader(dayRecords.get(0).createdAt, dayRecords.size(), subtotal));
+            parent.addView(dayHeader(dayRecords.get(0).createdAt, dayRecords.size(), subtotal, rate));
             for (Record record : dayRecords) parent.addView(recordCard(record));
         }
     }
 
-    private View dayHeader(long timestamp, int count, double subtotal) {
+    private View dayHeader(long timestamp, int count, double subtotal, double rate) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(dp(2), dp(14), dp(2), dp(9));
         TextView title = text(dayLabel(timestamp) + "  " + count + " 笔", 15, INK, true);
         row.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        TextView total = text("当日 ¥" + amountFormat.format(subtotal), 13, MUTED, false);
+        TextView total = text("当日 ¥" + amountFormat.format(subtotal)
+                + " · RMB " + amountFormat.format(subtotal * rate), 13, MUTED, false);
         row.addView(total);
         return row;
     }
@@ -393,24 +468,31 @@ public class MainActivity extends Activity {
         heading.setPadding(dp(2), dp(2), 0, dp(10));
         parent.addView(heading);
 
-        LinearLayout firstRow = new LinearLayout(this);
-        firstRow.setOrientation(LinearLayout.HORIZONTAL);
-        parent.addView(firstRow, lpMatch(dp(76)));
-        LinearLayout secondRow = new LinearLayout(this);
-        secondRow.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams secondParams = lpMatch(dp(76));
-        secondParams.setMargins(0, dp(8), 0, dp(18));
-        parent.addView(secondRow, secondParams);
-
-        for (int i = 0; i < CATEGORIES.length; i++) {
-            String category = CATEGORIES[i];
+        List<String> categories = loadCategories();
+        LinearLayout row = null;
+        for (int i = 0; i < categories.size(); i++) {
+            if (i % 2 == 0) {
+                row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                LinearLayout.LayoutParams rowParams = lpMatch(dp(76));
+                rowParams.setMargins(0, i == 0 ? 0 : dp(8), 0,
+                        i >= categories.size() - 2 ? dp(18) : 0);
+                parent.addView(row, rowParams);
+            }
+            String category = categories.get(i);
             double subtotal = 0;
             for (Record record : records) if (category.equals(record.category)) subtotal += record.amount;
             LinearLayout card = categorySummaryCard(category, subtotal);
             LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(0, dp(76), 1);
             if (i % 2 == 0) cardParams.setMargins(0, 0, dp(4), 0);
             else cardParams.setMargins(dp(4), 0, 0, 0);
-            (i < 2 ? firstRow : secondRow).addView(card, cardParams);
+            row.addView(card, cardParams);
+            if (i == categories.size() - 1 && i % 2 == 0) {
+                Space filler = new Space(this);
+                LinearLayout.LayoutParams fillerParams = new LinearLayout.LayoutParams(0, dp(76), 1);
+                fillerParams.setMargins(dp(4), 0, 0, 0);
+                row.addView(filler, fillerParams);
+            }
         }
 
         int unclassified = 0;
@@ -436,14 +518,15 @@ public class MainActivity extends Activity {
         return card;
     }
 
-    private View categoryHeader(String category, int count, double subtotal) {
+    private View categoryHeader(String category, int count, double subtotal, double rate) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(dp(2), dp(12), dp(2), dp(9));
         TextView title = text(category + "  " + count + " 笔", 15, INK, true);
         row.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        TextView total = text("小计 ¥" + amountFormat.format(subtotal), 13, MUTED, false);
+        TextView total = text("小计 ¥" + amountFormat.format(subtotal)
+                + " · RMB " + amountFormat.format(subtotal * rate), 13, MUTED, false);
         row.addView(total);
         return row;
     }
@@ -624,11 +707,12 @@ public class MainActivity extends Activity {
     private void exportCsv(Uri uri, List<Record> records) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         DecimalFormat csvAmount = new DecimalFormat("0.##");
+        double rate = loadJpyToCnyRate();
         try (OutputStream output = getContentResolver().openOutputStream(uri);
              OutputStreamWriter writer = output == null ? null : new OutputStreamWriter(output, "UTF-8")) {
             if (writer == null) throw new IOException("Cannot open export destination");
             writer.write('\uFEFF');
-            writer.write("日期时间,消费项目,类别,金额（日元）\r\n");
+            writer.write("日期时间,消费项目,类别,金额（日元）,汇率（日元到人民币）,折合人民币\r\n");
             for (Record record : records) {
                 writer.write(csvCell(dateFormat.format(new Date(record.createdAt))));
                 writer.write(",");
@@ -637,6 +721,10 @@ public class MainActivity extends Activity {
                 writer.write(csvCell(normalizeCategory(record.category)));
                 writer.write(",");
                 writer.write(csvAmount.format(record.amount));
+                writer.write(",");
+                writer.write(rateFormat.format(rate));
+                writer.write(",");
+                writer.write(csvAmount.format(record.amount * rate));
                 writer.write("\r\n");
             }
             writer.flush();
@@ -708,7 +796,14 @@ public class MainActivity extends Activity {
 
         ParsedExpense result = new ParsedExpense();
         result.item = item;
-        result.amount = amount;
+        String currency = last.group(2) == null ? "JPY" : last.group(2).toUpperCase(Locale.ROOT);
+        if ("人民币".equals(currency) || "RMB".equals(currency) || "CNY".equals(currency) || "块".equals(currency)) {
+            result.amount = amount / loadJpyToCnyRate();
+            result.sourceCurrency = "CNY";
+        } else {
+            result.amount = amount;
+            result.sourceCurrency = "JPY";
+        }
         result.category = "未分类";
         return result;
     }
@@ -750,7 +845,9 @@ public class MainActivity extends Activity {
         content.setOrientation(LinearLayout.VERTICAL);
         content.setPadding(dp(24), dp(8), dp(24), 0);
 
-        TextView detected = text("保存后可在管理页手动归类", 13, MUTED, false);
+        TextView detected = text("CNY".equals(parsed.sourceCurrency)
+                ? "已按当前汇率折算为日元，保存后可手动归类"
+                : "保存后可在管理页手动归类", 13, MUTED, false);
         detected.setPadding(0, 0, 0, dp(12));
         content.addView(detected);
 
@@ -820,30 +917,195 @@ public class MainActivity extends Activity {
     }
 
     private void showCategoryDialog(Record record) {
+        List<String> categories = loadCategories();
+        String[] categoryArray = categories.toArray(new String[0]);
         int checked = -1;
-        for (int i = 0; i < CATEGORIES.length; i++) {
-            if (CATEGORIES[i].equals(record.category)) {
+        for (int i = 0; i < categoryArray.length; i++) {
+            if (categoryArray[i].equals(record.category)) {
                 checked = i;
                 break;
             }
         }
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("给“" + record.item + "”归类")
-                .setSingleChoiceItems(CATEGORIES, checked, null)
+                .setSingleChoiceItems(categoryArray, checked, null)
                 .setNegativeButton("取消", null)
                 .setPositiveButton("确定", null)
                 .create();
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             int selected = dialog.getListView().getCheckedItemPosition();
-            if (selected < 0 || selected >= CATEGORIES.length) {
+            if (selected < 0 || selected >= categoryArray.length) {
                 Toast.makeText(this, "请选择一个类别", Toast.LENGTH_SHORT).show();
                 return;
             }
-            updateRecordCategory(record.id, CATEGORIES[selected]);
+            updateRecordCategory(record.id, categoryArray[selected]);
             dialog.dismiss();
             showManage();
         }));
         dialog.show();
+    }
+
+    private void showCategoryManagerDialog() {
+        List<String> categories = loadCategories();
+        String[] categoryArray = categories.toArray(new String[0]);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("管理分类")
+                .setItems(categoryArray, (d, which) -> {
+                    d.dismiss();
+                    showEditCategoryDialog(categoryArray[which]);
+                })
+                .setNeutralButton("新增", null)
+                .setPositiveButton("关闭", null)
+                .create();
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(MUTED);
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(INK);
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                dialog.dismiss();
+                showEditCategoryDialog(null);
+            });
+        });
+        dialog.show();
+    }
+
+    private void showEditCategoryDialog(String oldName) {
+        boolean editing = oldName != null;
+        EditText input = dialogInput(editing ? oldName : "", InputType.TYPE_CLASS_TEXT);
+        input.setHint("例如：门票");
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(24), dp(8), dp(24), 0);
+        content.addView(input, lpMatch(dp(54)));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(editing ? "编辑分类" : "新增分类")
+                .setView(content)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("保存", null);
+        if (editing) builder.setNeutralButton("删除", null);
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(INK);
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(MUTED);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String name = cleanCategoryName(input.getText().toString());
+                if (name.isEmpty()) {
+                    input.setError("请输入分类名称");
+                    return;
+                }
+                if ("未分类".equals(name)) {
+                    input.setError("未分类是系统保留分类");
+                    return;
+                }
+                List<String> categories = loadCategories();
+                if ((!editing || !oldName.equals(name)) && categories.contains(name)) {
+                    input.setError("这个分类已经存在");
+                    return;
+                }
+                if (editing) renameCategory(oldName, name);
+                else addCategory(name);
+                dialog.dismiss();
+                showManage();
+            });
+            Button delete = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+            if (delete != null) {
+                delete.setTextColor(Color.rgb(174, 70, 58));
+                delete.setOnClickListener(v -> {
+                    dialog.dismiss();
+                    confirmDeleteCategory(oldName);
+                });
+            }
+        });
+        dialog.show();
+    }
+
+    private void confirmDeleteCategory(String category) {
+        if (loadCategories().size() <= 1) {
+            Toast.makeText(this, "至少保留一个分类", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("删除分类？")
+                .setMessage("“" + category + "”下的记录会改为未分类")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("删除", (dialog, which) -> {
+                    deleteCategory(category);
+                    showManage();
+                })
+                .show();
+    }
+
+    private void showRateDialog() {
+        EditText input = dialogInput(rateFormat.format(loadJpyToCnyRate()),
+                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(24), dp(8), dp(24), 0);
+        TextView help = text("填写 1 日元可兑换多少人民币", 13, MUTED, false);
+        help.setPadding(0, 0, 0, dp(10));
+        content.addView(help);
+        content.addView(input, lpMatch(dp(54)));
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("手动设置汇率")
+                .setView(content)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("保存", null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            double rate;
+            try {
+                rate = Double.parseDouble(input.getText().toString());
+            } catch (NumberFormatException e) {
+                input.setError("请输入正确汇率");
+                return;
+            }
+            if (rate <= 0 || rate > 1) {
+                input.setError("汇率需要在 0 到 1 之间");
+                return;
+            }
+            saveJpyToCnyRate(rate);
+            dialog.dismiss();
+            showManage();
+        }));
+        dialog.show();
+    }
+
+    private void refreshExchangeRate() {
+        if (exchangeLoading) return;
+        exchangeLoading = true;
+        showManage();
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://open.er-api.com/v6/latest/JPY");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(6000);
+                connection.setReadTimeout(6000);
+                connection.setRequestMethod("GET");
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    StringBuilder raw = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) raw.append(line);
+                    JSONObject json = new JSONObject(raw.toString());
+                    double rate = json.getJSONObject("rates").optDouble("CNY", 0);
+                    if (rate <= 0) throw new IOException("Missing CNY rate");
+                    saveJpyToCnyRate(rate);
+                } finally {
+                    connection.disconnect();
+                }
+                runOnUiThread(() -> {
+                    exchangeLoading = false;
+                    Toast.makeText(this, "汇率已更新", Toast.LENGTH_SHORT).show();
+                    if (currentScreen == Screen.MANAGE) showManage();
+                });
+            } catch (Exception error) {
+                runOnUiThread(() -> {
+                    exchangeLoading = false;
+                    Toast.makeText(this, "汇率更新失败，已保留当前汇率", Toast.LENGTH_LONG).show();
+                    if (currentScreen == Screen.MANAGE) showManage();
+                });
+            }
+        }).start();
     }
 
     private void confirmDelete(Record record) {
@@ -916,6 +1178,87 @@ public class MainActivity extends Activity {
         getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(RECORDS_KEY, array.toString()).apply();
     }
 
+    private List<String> loadCategories() {
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        String raw = prefs.getString(CATEGORIES_KEY, null);
+        List<String> categories = new ArrayList<>();
+        if (raw == null) {
+            Collections.addAll(categories, DEFAULT_CATEGORIES);
+            return categories;
+        }
+        try {
+            JSONArray array = new JSONArray(raw);
+            for (int i = 0; i < array.length(); i++) {
+                String category = cleanCategoryName(array.optString(i));
+                if (!category.isEmpty() && !"未分类".equals(category) && !categories.contains(category)) {
+                    categories.add(category);
+                }
+            }
+        } catch (JSONException ignored) {
+            Collections.addAll(categories, DEFAULT_CATEGORIES);
+        }
+        if (categories.isEmpty()) categories.add("其他");
+        return categories;
+    }
+
+    private void persistCategories(List<String> categories) {
+        JSONArray array = new JSONArray();
+        for (String category : categories) {
+            String clean = cleanCategoryName(category);
+            if (!clean.isEmpty() && !"未分类".equals(clean)) array.put(clean);
+        }
+        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(CATEGORIES_KEY, array.toString()).apply();
+    }
+
+    private void addCategory(String category) {
+        List<String> categories = loadCategories();
+        if (!categories.contains(category)) {
+            categories.add(category);
+            persistCategories(categories);
+        }
+    }
+
+    private void renameCategory(String oldName, String newName) {
+        List<String> categories = loadCategories();
+        for (int i = 0; i < categories.size(); i++) {
+            if (categories.get(i).equals(oldName)) {
+                categories.set(i, newName);
+                break;
+            }
+        }
+        persistCategories(categories);
+
+        List<Record> records = loadRecords();
+        for (Record record : records) if (oldName.equals(record.category)) record.category = newName;
+        persistRecords(records);
+    }
+
+    private void deleteCategory(String category) {
+        List<String> categories = loadCategories();
+        categories.remove(category);
+        persistCategories(categories);
+
+        List<Record> records = loadRecords();
+        for (Record record : records) if (category.equals(record.category)) record.category = "未分类";
+        persistRecords(records);
+    }
+
+    private String cleanCategoryName(String value) {
+        return value == null ? "" : value.replaceAll("\\s+", "").trim();
+    }
+
+    private double loadJpyToCnyRate() {
+        return Double.longBitsToDouble(getSharedPreferences(PREFS, MODE_PRIVATE)
+                .getLong(JPY_TO_CNY_RATE_KEY, Double.doubleToLongBits(0.049)));
+    }
+
+    private void saveJpyToCnyRate(double rate) {
+        getSharedPreferences(PREFS, MODE_PRIVATE).edit()
+                .putLong(JPY_TO_CNY_RATE_KEY, Double.doubleToLongBits(rate))
+                .putLong(RATE_UPDATED_AT_KEY, System.currentTimeMillis())
+                .apply();
+    }
+
     private String categoryIcon(String category) {
         switch (category) {
             case "餐饮": return "餐";
@@ -927,9 +1270,10 @@ public class MainActivity extends Activity {
     }
 
     private String normalizeCategory(String category) {
-        if ("餐饮".equals(category) || "购物".equals(category) || "交通".equals(category)
-                || "其他".equals(category) || "未分类".equals(category)) return category;
-        return "其他";
+        String clean = cleanCategoryName(category);
+        if ("未分类".equals(clean)) return clean;
+        if (loadCategories().contains(clean)) return clean;
+        return "未分类";
     }
 
     private Button giantButton(String label, int background, int foreground) {

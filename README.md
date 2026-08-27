@@ -21,7 +21,7 @@
 
 旅账（Japan Travel Ledger）是一款开源的日本旅行记账、日元消费记录和旅行预算管理工具。它适合希望快速记录拉面、便利店、交通、购物等旅行开销，同时不想注册账号或把账目上传云端的 Android 用户。
 
-输入或说出 `拉面 1200 日元`，旅账会在本地提取消费项目与金额，确认后保存。你可以在管理页手动归类、查看各类花费，并导出 CSV 进行报销、旅行复盘或预算分析。
+输入或说出 `拉面 1200 日元`，旅账会在本地提取消费项目与金额，确认后保存。你可以在管理页自定义分类、手动归类、刷新日元到人民币汇率、查看折算后的花费，并导出 CSV 进行报销、旅行复盘或预算分析。
 
 > 核心记账、金额提取、分类、统计和 CSV 导出均在本机完成。语音转文字由手机的系统语音引擎提供，是否联网取决于设备厂商。
 
@@ -33,7 +33,9 @@
 | 不想注册账号 | 无账号、无登录、无云端服务 |
 | 保护消费隐私 | 账目保存在 Android 应用私有存储中 |
 | 避免错误自动分类 | 新账目默认未分类，由用户手动决定 |
+| 分类不够用 | 可在管理页新增、重命名或删除分类 |
 | 查看旅行预算结构 | 展示总额、分类金额、笔数和小计 |
+| 估算人民币成本 | 支持 JPY → CNY 实时汇率刷新和手动汇率 |
 | 带走或分析数据 | 导出 UTF-8 CSV，兼容 Excel 和 Numbers |
 | 小米手机使用 | 已适配小米 14 Pro、HyperOS 3 和居中挖孔屏 |
 
@@ -43,9 +45,12 @@
 - **自然语言记账**：从 `寿司 2800 日元`、`地铁 220 円` 等文本中提取项目和金额
 - **语音输入**：调用 Android `SpeechRecognizer` 实现系统语音转文字
 - **保存前确认**：识别结果可编辑，确认后才写入账本
-- **手动分类**：餐饮、购物、交通、其他，避免关键词误判
+- **自定义分类**：默认包含餐饮、购物、交通、其他，也可在管理页新增、重命名或删除
+- **手动分类**：新账目默认未分类，点击记录即可选择当前分类列表中的任意分类
 - **分类统计**：总花费、分类花费、消费笔数与分类小计
 - **按天管理**：可按日期查看每天的消费笔数、当日合计和账目明细
+- **实时汇率**：管理页支持刷新 JPY → CNY 汇率，也可在断网时手动设置
+- **人民币折算**：总额、分类小计、按天小计和 CSV 导出显示折合人民币
 - **CSV 导出**：通过 Android 系统文件选择器保存，无需通用存储权限
 - **本地优先**：无账号、无广告、无统计 SDK、无账目服务器
 - **设备适配**：Android 8.0+，兼容状态栏、底部导航栏和居中挖孔安全区域
@@ -92,7 +97,7 @@
 在管理页点击「导出 CSV」，选择保存位置。导出字段包括：
 
 ```text
-日期时间,消费项目,类别,金额（日元）
+日期时间,消费项目,类别,金额（日元）,汇率（日元到人民币）,折合人民币
 ```
 
 CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其他数据分析工具读取。
@@ -103,10 +108,11 @@ CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其
 | --- | --- | --- |
 | 文字记账与金额提取 | 否 | 本机 |
 | 账目保存与分类统计 | 否 | 本机 |
+| 汇率刷新 | 是 | 仅请求公开汇率接口，不上传账目 |
 | CSV 导出 | 否 | 用户选择的本地文件位置 |
 | 语音转文字 | 取决于系统语音引擎 | 由手机语音服务决定 |
 
-应用只申请麦克风权限，并且仅在用户主动点击语音按钮时调用。详见 [隐私说明](PRIVACY.md)。
+应用申请麦克风和联网权限。麦克风仅在用户主动点击语音按钮时调用；联网用于用户主动刷新汇率。详见 [隐私说明](PRIVACY.md)。
 
 ## 技术架构
 
@@ -114,6 +120,7 @@ CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其
 - 零第三方运行时依赖
 - `SharedPreferences + JSON` 本地持久化
 - 正则规则本地提取消费项目和金额
+- `HttpURLConnection` 获取公开 JPY → CNY 汇率，并在本地缓存
 - Android `SpeechRecognizer` 系统语音接口
 - Storage Access Framework 安全导出 CSV
 - Android Window Insets / Display Cutout 安全区域适配
@@ -170,14 +177,14 @@ app/build/outputs/apk/debug/app-debug.apk
 <details>
 <summary><strong>支持人民币或多币种吗？</strong></summary>
 
-当前版本聚焦日本旅行，以日元为记账和统计单位。多币种与汇率换算尚未实现。
+当前版本以日元为记账主币种，支持管理页刷新 JPY → CNY 汇率，并显示人民币折算。输入明确的人民币、RMB、CNY 或「块」金额时，会按当前汇率折算为日元保存。
 </details>
 
 ## 路线图
 
-- [ ] 自定义消费类别
+- [x] 自定义消费类别
 - [ ] 旅行日期与每日预算
-- [ ] 多币种和可选汇率换算
+- [x] 日元到人民币汇率换算
 - [ ] 本地备份与恢复
 - [ ] 更完善的金额表达解析
 - [ ] 可选的完全离线语音识别方案
@@ -186,7 +193,7 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## 版本与发布
 
-- 当前版本：**2.1.1**
+- 当前版本：**3.0.0**
 - [下载所有 APK 版本](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
 - [完整更新记录](CHANGELOG.md)
 - [各版本发布说明](docs/releases)
@@ -204,9 +211,11 @@ app/build/outputs/apk/debug/app-debug.apk
 - Fast JPY expense entry from text such as `ramen 1200 yen`
 - Optional voice input through Android's system speech recognizer
 - No account, cloud backend, ads, analytics SDK, or expense upload
-- Manual categories: Food, Shopping, Transport, and Other
+- Customizable categories with manual classification
 - Total spending, category totals, counts, and grouped records
 - Category and daily management views with per-day spending totals
+- Live JPY to CNY exchange-rate refresh with manual fallback
+- RMB estimates in totals, subtotals, and CSV exports
 - CSV export for Excel, Numbers, Google Sheets, Python, or reimbursement workflows
 - Android 8.0+ and center punch-hole display support
 - Tested and adjusted for Xiaomi 14 Pro / HyperOS 3
