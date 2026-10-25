@@ -1,9 +1,10 @@
+[English](README.md) | [中文](README.zh-CN.md)
+
 <div align="center">
-  <img src="docs/assets/hero.svg" alt="旅账 Japan Travel Ledger — privacy-first offline Android expense tracker for Japan travel" width="100%" />
+  <img src="docs/assets/hero.svg" alt="Japan Travel Ledger — a privacy-first, local-first Android expense tracker for travel in Japan" width="100%" />
 
-  # 旅账 · Japan Travel Ledger
+  # Japan Travel Ledger · 旅账
 
-  **为日本旅行而生的极简、本地优先 Android 记账 App**  
   **A minimal, privacy-first Android expense tracker for travel in Japan.**
 
   [![Android 8+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
@@ -12,220 +13,195 @@
   [![No Ads](https://img.shields.io/badge/ads-none-17211B)](PRIVACY.md)
   [![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-  [下载 APK](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) · [功能介绍](#核心功能) · [隐私说明](PRIVACY.md) · [English](#english)
+  [Download APK](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) · [Features](#features) · [Privacy](PRIVACY.md) · [中文](README.zh-CN.md)
 </div>
 
 ---
 
-## 旅账是什么？
+## What is Japan Travel Ledger?
 
-旅账（Japan Travel Ledger）是一款开源的日本旅行记账、日元消费记录和旅行预算管理工具。它适合希望快速记录拉面、便利店、交通、购物等旅行开销，同时不想注册账号或把账目上传云端的 Android 用户。
+Japan Travel Ledger (旅账) is an open-source Android app for recording Japanese-yen expenses and managing spending during a trip to Japan. It is designed for quick entries such as meals, convenience-store purchases, transport and shopping, without creating an account or uploading your ledger to a cloud service.
 
-输入或说出 `拉面 1200 日元`，旅账会在本地提取消费项目与金额，确认后保存。你可以在管理页自定义分类、手动归类、刷新日元到人民币汇率、查看折算后的花费，并导出 CSV 进行报销、旅行复盘或预算分析。
+Type or say `拉面 1200 日元` (“ramen, 1,200 yen”). The app extracts the item and amount locally and saves the entry after you confirm it. In Manage (管理), you can customize categories, classify entries manually, refresh the JPY → CNY exchange rate, view converted spending and export CSV files for reimbursement, a trip review or budget analysis.
 
-> 核心记账、金额提取、分类、统计和 CSV 导出均在本机完成。语音转文字由手机的系统语音引擎提供，是否联网取决于设备厂商。
+> Core bookkeeping, amount extraction, categories, statistics and CSV export run on your device. Speech-to-text uses the phone's system speech engine; whether it connects to the internet depends on the device and speech service.
 
-## 为什么选择旅账？
+## Why use it?
 
-| 需求 | 旅账的做法 |
+| Need | How the app handles it |
 | --- | --- |
-| 日本旅游快速记账 | 针对日元金额与中文自然语言输入优化 |
-| 不想注册账号 | 无账号、无登录、无云端服务 |
-| 保护消费隐私 | 账目保存在 Android 应用私有存储中 |
-| 避免错误自动分类 | 新账目默认未分类，由用户手动决定 |
-| 分类不够用 | 可在管理页新增、重命名或删除分类 |
-| 查看旅行预算结构 | 展示总额、分类金额、笔数和小计 |
-| 估算人民币成本 | 支持 JPY → CNY 实时汇率刷新和手动汇率 |
-| 带走或分析数据 | 导出 UTF-8 CSV，兼容 Excel 和 Numbers |
-| 小米手机使用 | 已适配小米 14 Pro、HyperOS 3 和居中挖孔屏 |
+| Quick expense entry in Japan | Optimized for yen amounts and Chinese natural-language input |
+| No account registration | No account, login or cloud service |
+| Private spending records | Entries stay in Android app-private storage |
+| Avoid incorrect automatic categories | New entries remain uncategorized until you classify them |
+| More flexible categories | Add, rename or delete categories in Manage |
+| Understand spending | View totals, category amounts, entry counts and subtotals |
+| Estimate costs in Chinese yuan | Refresh the JPY → CNY rate or enter it manually |
+| Take your data with you | Export UTF-8 CSV for Excel, Numbers and other tools |
+| Xiaomi device support | Adjusted for Xiaomi 14 Pro, HyperOS 3 and centered camera cutouts |
 
-## 核心功能
+## Features
 
-- **极简入口**：首页只保留「记账」和「管理」两个大按钮
-- **自然语言记账**：从 `寿司 2800 日元`、`地铁 220 円` 等文本中提取项目和金额
-- **语音输入**：调用 Android `SpeechRecognizer` 实现系统语音转文字
-- **保存前确认**：识别结果可编辑，确认后才写入账本
-- **自定义分类**：默认包含餐饮、购物、交通、其他，也可在管理页新增、重命名或删除
-- **手动分类**：新账目默认未分类，点击记录即可选择当前分类列表中的任意分类
-- **分类统计**：总花费、分类花费、消费笔数与分类小计
-- **按天管理**：可按日期查看每天的消费笔数、当日合计和账目明细
-- **实时汇率**：管理页支持刷新 JPY → CNY 汇率，也可在断网时手动设置
-- **人民币折算**：总额、分类小计、按天小计和 CSV 导出显示折合人民币
-- **CSV 导出**：通过 Android 系统文件选择器保存，无需通用存储权限
-- **本地优先**：无账号、无广告、无统计 SDK、无账目服务器
-- **设备适配**：Android 8.0+，兼容状态栏、底部导航栏和居中挖孔安全区域
+- **Simple home screen:** two large buttons, Record (记账) and Manage (管理).
+- **Natural-language entry:** extract an item and amount from text such as `寿司 2800 日元` or `地铁 220 円`.
+- **Voice input:** use Android `SpeechRecognizer` for system speech-to-text.
+- **Confirm before saving:** edit the recognized result before writing it to the ledger.
+- **Custom categories:** start with Food and drink (餐饮), Shopping (购物), Transport (交通) and Other (其他), then add, rename or delete categories.
+- **Manual classification:** new entries are uncategorized; tap an entry to choose any current category.
+- **Category statistics:** view total spending, category spending, entry counts and subtotals.
+- **Daily management:** browse each day's entries, counts and spending total.
+- **Exchange-rate refresh:** fetch the JPY → CNY rate in Manage, with manual entry available offline.
+- **CNY conversion:** show estimated Chinese-yuan values in totals, category subtotals, daily subtotals and CSV exports.
+- **CSV export:** save through Android's system file picker without broad storage permission.
+- **Local-first design:** no account, ads, analytics SDK or ledger server.
+- **Device support:** Android 8.0+, with status-bar, navigation-bar and centered display-cutout safe areas.
 
-## 界面预览
+## Screenshots
 
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-06-50-205_com.japanledger.app.jpg" width="320" alt="旅账 Japan Travel Ledger 极简首页，包含记账与管理两个入口" /><br />
-      <strong>极简首页 · 记账 / 管理</strong>
+      <img src="demo/Screenshot_2026-08-21-16-06-50-205_com.japanledger.app.jpg" width="320" alt="Japan Travel Ledger home screen with Record and Manage buttons" /><br />
+      <strong>Home · Record / Manage</strong>
     </td>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-06-47-576_com.japanledger.app.jpg" width="320" alt="旅账文字和语音消费输入页面，支持日元金额提取" /><br />
-      <strong>文字与语音记账</strong>
+      <img src="demo/Screenshot_2026-08-21-16-06-47-576_com.japanledger.app.jpg" width="320" alt="Text and voice expense entry with Japanese-yen amount extraction" /><br />
+      <strong>Text and voice entry</strong>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-20-50-002_com.japanledger.app.jpg" width="320" alt="旅账从咖啡1500文本中提取消费项目与日元金额并确认保存" /><br />
-      <strong>本地解析 · 保存前确认</strong>
+      <img src="demo/Screenshot_2026-08-21-16-20-50-002_com.japanledger.app.jpg" width="320" alt="Locally parsed coffee item and yen amount, ready for confirmation" /><br />
+      <strong>Local parsing · Confirm before saving</strong>
     </td>
     <td align="center" width="50%">
-      <img src="demo/Screenshot_2026-08-21-16-45-06-090_com.japanledger.app.jpg" width="320" alt="旅账按类别管理页面展示餐饮购物交通其他的分类金额、笔数与明细" /><br />
-      <strong>按类别 · 分类统计</strong>
+      <img src="demo/Screenshot_2026-08-21-16-45-06-090_com.japanledger.app.jpg" width="320" alt="Category management showing amounts, counts and expense details" /><br />
+      <strong>Categories · Spending statistics</strong>
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
-      <img src="demo/Screenshot_2026-08-21-16-44-59-004_com.japanledger.app.jpg" width="320" alt="旅账按天管理页面展示今天的消费笔数、当日合计与账目明细" /><br />
-      <strong>按天管理 · 当日合计</strong>
+      <img src="demo/Screenshot_2026-08-21-16-44-59-004_com.japanledger.app.jpg" width="320" alt="Daily view showing today's entry count, spending total and expense details" /><br />
+      <strong>Daily view · Daily totals</strong>
     </td>
   </tr>
 </table>
 
-## 三步开始使用
+## Get started in three steps
 
-1. 从 [GitHub Releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) 下载最新 APK 并安装。
-2. 点击「记账」，输入或说出消费内容，例如 `便利店饮料 180 日元`。
-3. 保存后进入「管理」，点击记录手动归类并查看分类统计。
+1. Download and install the latest APK from [GitHub Releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest).
+2. Tap Record (记账), then type or say an expense such as `便利店饮料 180 日元` (“convenience-store drink, 180 yen”).
+3. After saving, open Manage (管理), tap an entry to classify it and review category statistics.
 
-### 导出账目
+### Export your ledger
 
-在管理页点击「导出 CSV」，选择保存位置。导出字段包括：
+In Manage, tap Export CSV (导出 CSV) and choose a save location. The export contains these fields:
 
-```text
+~~~text
 日期时间,消费项目,类别,金额（日元）,汇率（日元到人民币）,折合人民币
-```
+~~~
 
-CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其他数据分析工具读取。
+The fields are date/time, item, category, amount in JPY, JPY-to-CNY exchange rate and equivalent CNY amount. CSV files use UTF-8 and can be read with Excel, Numbers, Google Sheets, Python or other analysis tools.
 
-## 隐私与联网说明
+## Privacy and network access
 
-| 功能 | 是否需要联网 | 数据位置 |
+| Feature | Internet needed? | Where data is handled |
 | --- | --- | --- |
-| 文字记账与金额提取 | 否 | 本机 |
-| 账目保存与分类统计 | 否 | 本机 |
-| 汇率刷新 | 是 | 仅请求公开汇率接口，不上传账目 |
-| CSV 导出 | 否 | 用户选择的本地文件位置 |
-| 语音转文字 | 取决于系统语音引擎 | 由手机语音服务决定 |
+| Text entry and amount extraction | No | On your device |
+| Ledger storage and category statistics | No | On your device |
+| Exchange-rate refresh | Yes | Requests a public rate API; no ledger entries are uploaded |
+| CSV export | No | The local file location you choose |
+| Speech-to-text | Depends on the system speech engine | Determined by the phone's speech service |
 
-应用申请麦克风和联网权限。麦克风仅在用户主动点击语音按钮时调用；联网用于用户主动刷新汇率。详见 [隐私说明](PRIVACY.md)。
+The app requests microphone and internet permissions. The microphone is used only when you tap the voice-input button. The app's exchange-rate request runs when you refresh the rate; the system speech service may also use the network. See [Privacy](PRIVACY.md).
 
-## 技术架构
+## Architecture
 
-- 原生 Android Java，JDK 17，compile SDK 35
-- 零第三方运行时依赖
-- `SharedPreferences + JSON` 本地持久化
-- 正则规则本地提取消费项目和金额
-- `HttpURLConnection` 获取公开 JPY → CNY 汇率，并在本地缓存
-- Android `SpeechRecognizer` 系统语音接口
-- Storage Access Framework 安全导出 CSV
-- Android Window Insets / Display Cutout 安全区域适配
+- Native Android Java, JDK 17 and compile SDK 35.
+- No third-party runtime dependencies.
+- Local persistence with `SharedPreferences + JSON`.
+- Regular-expression rules to extract expense items and amounts locally.
+- `HttpURLConnection` to fetch a public JPY → CNY rate and cache it locally.
+- Android `SpeechRecognizer` for system speech input.
+- Storage Access Framework for CSV export.
+- Android Window Insets / Display Cutout handling for safe areas.
 
-进一步了解实现：[架构说明](docs/ARCHITECTURE.md) · [主程序源码](app/src/main/java/com/japanledger/app/MainActivity.java)
+Read the [architecture notes](docs/ARCHITECTURE.md) or [main source file](app/src/main/java/com/japanledger/app/MainActivity.java).
 
-## 本地构建
+## Build locally
 
-准备 JDK 17 和 Android SDK 35，然后克隆项目：
+Prepare JDK 17 and Android SDK 35, then clone the project:
 
-```bash
+~~~bash
 git clone https://github.com/Jason-Wu-7744/japan-travel-ledger.git
 cd japan-travel-ledger
-```
+~~~
 
-创建不提交到 Git 的 `local.properties`：
+Create a `local.properties` file and keep it out of Git:
 
-```properties
+~~~properties
 sdk.dir=/your/path/to/Android/sdk
-```
+~~~
 
-构建调试 APK：
+Build a debug APK:
 
-```bash
+~~~bash
 ./gradlew assembleDebug
-```
+~~~
 
-输出位置：
+Output:
 
-```text
+~~~text
 app/build/outputs/apk/debug/app-debug.apk
-```
+~~~
 
 ## FAQ
 
 <details>
-<summary><strong>旅账需要联网吗？</strong></summary>
+<summary><strong>Does the app need an internet connection?</strong></summary>
 
-文字记账、解析、保存、统计与 CSV 导出均不需要联网。语音识别是否联网取决于手机安装的系统语音引擎。
+Text entry, parsing, saving, statistics and CSV export work offline. Refreshing the exchange rate uses the internet. Whether voice recognition connects depends on the system speech engine installed on your phone.
 </details>
 
 <details>
-<summary><strong>为什么不再自动分类？</strong></summary>
+<summary><strong>Why are expenses categorized manually?</strong></summary>
 
-同一个项目在不同场景下可能属于不同类别。例如便利店购买饮料更像购物，而餐厅购买饮料可能属于餐饮。手动分类可以避免不可解释的误判。
+The same item can belong to different categories in different situations. A drink from a convenience store might be shopping, while a drink at a restaurant might belong under food and drink. Manual classification avoids unexplained automatic guesses.
 </details>
 
 <details>
-<summary><strong>卸载后账目还在吗？</strong></summary>
+<summary><strong>Will my records survive uninstalling the app?</strong></summary>
 
-不在。账目保存在应用私有存储中，卸载或清除应用数据会删除记录。建议旅行期间定期导出 CSV 备份。
+No. Records are stored in app-private storage, so uninstalling the app or clearing its data deletes them. Export CSV backups regularly during your trip.
 </details>
 
 <details>
-<summary><strong>支持人民币或多币种吗？</strong></summary>
+<summary><strong>Does it support CNY or multiple currencies?</strong></summary>
 
-当前版本以日元为记账主币种，支持管理页刷新 JPY → CNY 汇率，并显示人民币折算。输入明确的人民币、RMB、CNY 或「块」金额时，会按当前汇率折算为日元保存。
+JPY is the ledger's main currency. You can refresh the JPY → CNY rate in Manage and see estimated Chinese-yuan amounts. Input explicitly marked as 人民币, RMB, CNY or 块 is converted into JPY at the current rate before it is saved.
 </details>
 
-## 路线图
+## Roadmap
 
-- [x] 自定义消费类别
-- [ ] 旅行日期与每日预算
-- [x] 日元到人民币汇率换算
-- [ ] 本地备份与恢复
-- [ ] 更完善的金额表达解析
-- [ ] 可选的完全离线语音识别方案
+- [x] Custom expense categories
+- [ ] Trip dates and daily budgets
+- [x] JPY-to-CNY conversion
+- [ ] Local backup and restore
+- [ ] More complete amount-expression parsing
+- [ ] Optional fully offline speech recognition
 
-欢迎通过 [Issues](https://github.com/Jason-Wu-7744/japan-travel-ledger/issues) 提交建议，或阅读 [贡献指南](CONTRIBUTING.md) 后参与开发。
+Suggestions are welcome in [Issues](https://github.com/Jason-Wu-7744/japan-travel-ledger/issues). Read [Contributing](CONTRIBUTING.md) to help with development.
 
-## 版本与发布
+## Version and releases
 
-- 当前版本：**3.0.0**
-- [下载所有 APK 版本](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
-- [完整更新记录](CHANGELOG.md)
-- [各版本发布说明](docs/releases)
+- Current version: **3.0.0**
+- [All APK releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
+- [Full changelog](CHANGELOG.md)
+- [Release notes by version](docs/releases)
 
-如果旅账对你的旅行有帮助，欢迎点一个 ⭐ Star，让更多寻找离线旅行记账工具的人看到它。
-
----
-
-## English
-
-**Japan Travel Ledger** is an open-source, local-first Android expense tracker built for travel in Japan. It extracts an item and a Japanese-yen amount from natural language, stores every expense locally, supports manual categories, shows category totals, and exports UTF-8 CSV files.
-
-### Highlights
-
-- Fast JPY expense entry from text such as `ramen 1200 yen`
-- Optional voice input through Android's system speech recognizer
-- No account, cloud backend, ads, analytics SDK, or expense upload
-- Customizable categories with manual classification
-- Total spending, category totals, counts, and grouped records
-- Category and daily management views with per-day spending totals
-- Live JPY to CNY exchange-rate refresh with manual fallback
-- RMB estimates in totals, subtotals, and CSV exports
-- CSV export for Excel, Numbers, Google Sheets, Python, or reimbursement workflows
-- Android 8.0+ and center punch-hole display support
-- Tested and adjusted for Xiaomi 14 Pro / HyperOS 3
-
-The core ledger works offline. System speech recognition may require network access depending on the selected speech engine.
-
-**Search concepts:** offline Android expense tracker, Japan travel budget app, Japanese yen spending tracker, privacy-first travel ledger, local expense manager, voice expense entry, CSV expense export, HyperOS accounting app, 日本旅行记账, 日元记账, 离线记账, 旅行预算, 安卓开源记账, 日本旅行家計簿, 円支出管理.
-
-See [Privacy](PRIVACY.md), [Architecture](docs/ARCHITECTURE.md), [Contributing](CONTRIBUTING.md), and [Releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases).
+If the app helps with your trip, a GitHub star can help other travelers find it.
 
 ## License
 
 Released under the [MIT License](LICENSE).
+
