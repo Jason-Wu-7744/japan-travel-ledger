@@ -10,14 +10,18 @@
 
   [![Android 8+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
   [![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](app/src/main/java/com/japanledger/app/MainActivity.java)
-  [![Local First](https://img.shields.io/badge/data-local--first-B9E4CC)](PRIVACY.md)
-  [![No Ads](https://img.shields.io/badge/ads-none-17211B)](PRIVACY.md)
+  [![Local First](https://img.shields.io/badge/data-local--first-B9E4CC)](PRIVACY.zh-CN.md)
+  [![No Ads](https://img.shields.io/badge/ads-none-17211B)](PRIVACY.zh-CN.md)
   [![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-  [下载 APK](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) · [功能介绍](#核心功能) · [隐私说明](PRIVACY.md) · [English](README.md)
+  [下载 APK](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases/latest) · [功能介绍](#核心功能) · [隐私说明](PRIVACY.zh-CN.md) · [English](README.md)
 </div>
 
 ---
+
+## 源码与发布状态
+
+本文介绍主分支 3.0.0 源码。截至 2026-10-25，GitHub `releases/latest` 对应已发布的 v2.1.1，v3.0.0 发布仍是草稿，因此最新公开 APK 可能不含本文所述全部功能。应用界面和语音配置目前为中文，页面语言链接仅切换文档。
 
 ## 旅账是什么？
 
@@ -114,7 +118,7 @@ CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其
 | CSV 导出 | 否 | 用户选择的本地文件位置 |
 | 语音转文字 | 取决于系统语音引擎 | 由手机语音服务决定 |
 
-应用申请麦克风和联网权限。麦克风仅在用户主动点击语音按钮时调用；联网用于用户主动刷新汇率。详见 [隐私说明](PRIVACY.md)。
+应用申请麦克风和联网权限。麦克风仅在用户主动点击语音按钮时调用；联网用于用户主动刷新汇率。详见 [隐私说明](PRIVACY.zh-CN.md)。
 
 ## 技术架构
 
@@ -127,7 +131,7 @@ CSV 使用 UTF-8 编码，可用 Excel、Numbers、Google Sheets、Python 或其
 - Storage Access Framework 安全导出 CSV
 - Android Window Insets / Display Cutout 安全区域适配
 
-进一步了解实现：[架构说明](docs/ARCHITECTURE.md) · [主程序源码](app/src/main/java/com/japanledger/app/MainActivity.java)
+进一步了解实现：[架构说明](docs/ARCHITECTURE.zh-CN.md) · [主程序源码](app/src/main/java/com/japanledger/app/MainActivity.java)
 
 ## 本地构建
 
@@ -173,7 +177,7 @@ app/build/outputs/apk/debug/app-debug.apk
 <details>
 <summary><strong>卸载后账目还在吗？</strong></summary>
 
-不在。账目保存在应用私有存储中，卸载或清除应用数据会删除记录。建议旅行期间定期导出 CSV 备份。
+卸载或清除应用数据会删除本机副本。Android 系统备份仍启用，可能根据设备设置在之后恢复数据。建议导出自己可控的备份；应用目前不提供 CSV 导入。详见[隐私说明](PRIVACY.zh-CN.md)。
 </details>
 
 <details>
@@ -181,6 +185,8 @@ app/build/outputs/apk/debug/app-debug.apk
 
 当前版本以日元为记账主币种，支持管理页刷新 JPY → CNY 汇率，并显示人民币折算。输入明确的人民币、RMB、CNY 或「块」金额时，会按当前汇率折算为日元保存。
 </details>
+
+币种标记请放在金额后，例如 `100 CNY`；币种前缀及复合金额表达识别有限，请核对确认框中的日元值。
 
 ## 路线图
 
@@ -191,18 +197,26 @@ app/build/outputs/apk/debug/app-debug.apk
 - [ ] 更完善的金额表达解析
 - [ ] 可选的完全离线语音识别方案
 
-欢迎通过 [Issues](https://github.com/Jason-Wu-7744/japan-travel-ledger/issues) 提交建议，或阅读 [贡献指南](CONTRIBUTING.md) 后参与开发。
+欢迎通过 [Issues](https://github.com/Jason-Wu-7744/japan-travel-ledger/issues) 提交建议，或阅读 [贡献指南](CONTRIBUTING.zh-CN.md) 后参与开发。
 
 ## 版本与发布
 
-- 当前版本：**3.0.0**
+- 当前源码版本：**3.0.0**
+- 审计时最新公开 APK：**v2.1.1**
+- 审计时 v3.0.0 发布状态：**草稿**
+- [发布与源码验证边界](docs/releases/README.zh-CN.md)
 - [下载所有 APK 版本](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
-- [完整更新记录](CHANGELOG.md)
-- [各版本发布说明](docs/releases)
+- [完整更新记录](CHANGELOG.zh-CN.md)
+- [各版本发布说明](docs/releases/README.zh-CN.md)
 
 如果旅账对你的旅行有帮助，欢迎点一个 ⭐ Star，让更多寻找离线旅行记账工具的人看到它。
+
+## 验证范围
+
+审计使用 JDK 17 和 Android API 35 编译主 Java 文件，并运行定点数值回归检查。未验证完整 Gradle APK 构建、Android Lint、安装或真机行为；现有 APK 附件、签名及其与源码的对应关系未独立验证。已目视检查仓库中的七张截图，未观察到真实姓名、学号或凭据。
+
+构建尝试说明：离线 Gradle 构建及 Lint 调用在执行任务前因 Windows 无法加载 `native-platform.dll` 而中止。上文的 Java/API 编译与定点 JVM 检查分别完成，不据此声称 APK 构建或 Lint 成功。
 
 ## 许可
 
 本项目采用 [MIT License](LICENSE) 发布。
-

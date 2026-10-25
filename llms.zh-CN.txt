@@ -1,0 +1,21 @@
+# 旅账项目说明
+
+English: ./llms.txt
+中文说明: ./llms.zh-CN.txt
+项目地址: https://github.com/Jason-Wu-7744/japan-travel-ledger
+默认文档为英语，提供中文伴随页面；应用界面与语音配置目前为中文。
+许可证以现有 ./LICENSE 中的 MIT 原文为准。
+
+旅账是用于日本旅行的原生 Android Java 记账工具。本地处理文字金额提取、账目存储、手动分类、按天或类别统计及 CSV 导出。当前源码含自定义分类与 JPY/CNY 折算；汇率刷新由用户主动触发，语音由系统服务完成。
+
+截至 2026-10-25，源码版本为3.0.0，最新公开发布为v2.1.1，v3.0.0发布仍为草稿。早期多个标签共用2.1.0源码，APK签名、安装行为及与源码的对应关系未独立验证，详见 ./docs/releases/README.zh-CN.md。
+
+系统备份仍启用，偏好数据可能随设备设置被备份或迁移。导出文档位置可能是云端。语音可能联网；汇率请求不含账目内容。人民币折算使用当前选定汇率，并非历史汇率。复杂金额表达或无关数字需要用户确认。目前不提供CSV导入或应用自建同步。源码编译与定点数值检查不等于完整Android构建或真机验证。
+
+入口: ./README.zh-CN.md
+隐私: ./PRIVACY.zh-CN.md
+架构: ./docs/ARCHITECTURE.zh-CN.md
+更新: ./CHANGELOG.zh-CN.md
+贡献: ./CONTRIBUTING.zh-CN.md
+发布: ./docs/releases/README.zh-CN.md
+源码: ./app/src/main/java/com/japanledger/app/MainActivity.java

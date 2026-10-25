@@ -18,6 +18,10 @@
 
 ---
 
+## Source and release status
+
+This page describes main-source version 3.0.0. As checked on 2026-10-25, GitHub `releases/latest` serves published v2.1.1; the v3.0.0 release is still a draft. Features in current source may therefore be absent from the latest public APK. The app UI and speech configuration are Chinese; the language links select documentation only.
+
 ## What is Japan Travel Ledger?
 
 Japan Travel Ledger (旅账) is an open-source Android app for recording Japanese-yen expenses and managing spending during a trip to Japan. It is designed for quick entries such as meals, convenience-store purchases, transport and shopping, without creating an account or uploading your ledger to a cloud service.
@@ -32,7 +36,7 @@ Type or say `拉面 1200 日元` (“ramen, 1,200 yen”). The app extracts the 
 | --- | --- |
 | Quick expense entry in Japan | Optimized for yen amounts and Chinese natural-language input |
 | No account registration | No account, login or cloud service |
-| Private spending records | Entries stay in Android app-private storage |
+| Private spending records | App-private storage; Android system backup depends on device settings |
 | Avoid incorrect automatic categories | New entries remain uncategorized until you classify them |
 | More flexible categories | Add, rename or delete categories in Manage |
 | Understand spending | View totals, category amounts, entry counts and subtotals |
@@ -95,7 +99,7 @@ Type or say `拉面 1200 日元` (“ramen, 1,200 yen”). The app extracts the 
 
 ### Export your ledger
 
-In Manage, tap Export CSV (导出 CSV) and choose a save location. The export contains these fields:
+In Manage, tap Export CSV (导出 CSV) and choose a save location. The selected document provider can be cloud-backed; its behavior depends on your selection and provider settings. The export contains these fields:
 
 ~~~text
 日期时间,消费项目,类别,金额（日元）,汇率（日元到人民币）,折合人民币
@@ -172,7 +176,7 @@ The same item can belong to different categories in different situations. A drin
 <details>
 <summary><strong>Will my records survive uninstalling the app?</strong></summary>
 
-No. Records are stored in app-private storage, so uninstalling the app or clearing its data deletes them. Export CSV backups regularly during your trip.
+Uninstalling or clearing data removes the local copy. Android system backup is enabled and may restore it later, depending on device settings. Export backups you control; CSV import is not currently implemented. See [Privacy](PRIVACY.md).
 </details>
 
 <details>
@@ -180,6 +184,8 @@ No. Records are stored in app-private storage, so uninstalling the app or cleari
 
 JPY is the ledger's main currency. You can refresh the JPY → CNY rate in Manage and see estimated Chinese-yuan amounts. Input explicitly marked as 人民币, RMB, CNY or 块 is converted into JPY at the current rate before it is saved.
 </details>
+
+Place a CNY marker after the amount, for example `100 CNY`; currency prefixes and compound amount expressions are not reliably recognized, so review the JPY confirmation value.
 
 ## Roadmap
 
@@ -194,14 +200,22 @@ Suggestions are welcome in [Issues](https://github.com/Jason-Wu-7744/japan-trave
 
 ## Version and releases
 
-- Current version: **3.0.0**
+- Current source version: **3.0.0**
+- Latest published APK at the audit date: **v2.1.1**
+- v3.0.0 release status at the audit date: **draft**
+- [Release/source verification limits](docs/releases/README.md)
 - [All APK releases](https://github.com/Jason-Wu-7744/japan-travel-ledger/releases)
 - [Full changelog](CHANGELOG.md)
 - [Release notes by version](docs/releases)
 
 If the app helps with your trip, a GitHub star can help other travelers find it.
 
+## Verification scope
+
+The audit compiled the main Java source against Android API 35 with JDK 17 and ran targeted numeric regression checks. A full Gradle APK build, Android lint, installation test and device behavior were not verified. Existing APK assets and signatures were not independently verified against source. The seven repository screenshots were visually reviewed; no real name, student identifier or credential was observed.
+
+Build-attempt note: the offline Gradle build and lint invocation stopped before task execution because Windows could not load `native-platform.dll`. Java/API compilation and the targeted JVM checks above completed separately. No APK build or lint success is claimed.
+
 ## License
 
 Released under the [MIT License](LICENSE).
-

@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,8 +77,8 @@ public class MainActivity extends Activity {
     private SpeechRecognizer speechRecognizer;
     private boolean listening;
     private Screen currentScreen = Screen.HOME;
-    private final DecimalFormat amountFormat = new DecimalFormat("#,##0.##");
-    private final DecimalFormat rateFormat = new DecimalFormat("0.0000");
+    private final DecimalFormat amountFormat = new DecimalFormat("#,##0.##", DecimalFormatSymbols.getInstance(Locale.US));
+    private final DecimalFormat rateFormat = new DecimalFormat("0.0000", DecimalFormatSymbols.getInstance(Locale.US));
     private List<Record> pendingExportRecords;
     private boolean manageByDay;
     private boolean exchangeLoading;
@@ -238,7 +239,7 @@ public class MainActivity extends Activity {
         page.addView(parse, lpMatch(dp(72)));
         parse.setOnClickListener(v -> parseAndConfirm(entryInput.getText().toString()));
 
-        TextView local = text("信息只保存在这台手机里", 12, MUTED, false);
+        TextView local = text("账目保存在本机；系统备份由设备设置控制", 12, MUTED, false);
         local.setGravity(Gravity.CENTER);
         local.setPadding(0, dp(20), 0, 0);
         page.addView(local);
@@ -706,7 +707,7 @@ public class MainActivity extends Activity {
 
     private void exportCsv(Uri uri, List<Record> records) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        DecimalFormat csvAmount = new DecimalFormat("0.##");
+        DecimalFormat csvAmount = new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.US));
         double rate = loadJpyToCnyRate();
         try (OutputStream output = getContentResolver().openOutputStream(uri);
              OutputStreamWriter writer = output == null ? null : new OutputStreamWriter(output, "UTF-8")) {
@@ -785,7 +786,7 @@ public class MainActivity extends Activity {
         } catch (NumberFormatException e) {
             return null;
         }
-        if (amount <= 0) return null;
+        if (!Double.isFinite(amount) || amount <= 0) return null;
 
         String item = (normalized.substring(0, last.start()) + " " + normalized.substring(last.end())).trim();
         item = item.replaceAll("[，,。.!！?？]", " ")
@@ -885,7 +886,7 @@ public class MainActivity extends Activity {
                     itemInput.setError("请输入消费项目");
                     return;
                 }
-                if (amount <= 0) {
+                if (!Double.isFinite(amount) || amount <= 0) {
                     amountInput.setError("金额需要大于 0");
                     return;
                 }
@@ -1060,7 +1061,7 @@ public class MainActivity extends Activity {
                 input.setError("请输入正确汇率");
                 return;
             }
-            if (rate <= 0 || rate > 1) {
+            if (!Double.isFinite(rate) || rate <= 0 || rate > 1) {
                 input.setError("汇率需要在 0 到 1 之间");
                 return;
             }
@@ -1088,7 +1089,7 @@ public class MainActivity extends Activity {
                     while ((line = reader.readLine()) != null) raw.append(line);
                     JSONObject json = new JSONObject(raw.toString());
                     double rate = json.getJSONObject("rates").optDouble("CNY", 0);
-                    if (rate <= 0) throw new IOException("Missing CNY rate");
+                    if (!Double.isFinite(rate) || rate <= 0) throw new IOException("Missing CNY rate");
                     saveJpyToCnyRate(rate);
                 } finally {
                     connection.disconnect();
@@ -1248,8 +1249,9 @@ public class MainActivity extends Activity {
     }
 
     private double loadJpyToCnyRate() {
-        return Double.longBitsToDouble(getSharedPreferences(PREFS, MODE_PRIVATE)
+        double rate = Double.longBitsToDouble(getSharedPreferences(PREFS, MODE_PRIVATE)
                 .getLong(JPY_TO_CNY_RATE_KEY, Double.doubleToLongBits(0.049)));
+        return Double.isFinite(rate) && rate > 0 ? rate : 0.049;
     }
 
     private void saveJpyToCnyRate(double rate) {

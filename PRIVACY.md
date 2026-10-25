@@ -1,34 +1,32 @@
-# 旅账隐私说明
+[English](PRIVACY.md) | [中文](PRIVACY.zh-CN.md)
 
-更新日期：2026-08-27
+# Privacy
 
-## 数据存储
+Documentation reviewed: 2026-10-25. This describes the repository source; distributed APK behavior has not been independently verified against it.
 
-旅账记录的消费项目、金额、分类、自定义分类列表、汇率缓存和时间均保存在用户手机的应用私有存储中。应用没有服务器，不提供账号、云同步或远程备份功能。
+## Ledger storage and Android backup
 
-卸载应用或在系统设置中清除应用数据，会删除本地账目。建议定期使用 CSV 导出功能自行备份。
+Items, amounts, categories, custom category lists, cached exchange rates and timestamps are saved in app-private SharedPreferences on the device. The app has no account, ledger server or app-managed cloud synchronization.
 
-## 麦克风与语音识别
+**Android system backup remains enabled.** The manifest sets `android:allowBackup="true"` and declares no backup exclusion rules. Depending on device settings and the operating system's backup or transfer service, app-private preferences may be backed up or transferred outside this device. Local-first storage therefore does not guarantee that data never leaves the phone. See [Android's Auto Backup documentation](https://developer.android.com/identity/data/autobackup).
 
-只有在用户主动点击语音按钮时，旅账才会请求麦克风权限并调用 Android 系统语音识别服务。旅账不会自行在后台录音，也不会保存录音文件。
+Uninstalling the app or clearing its data removes the local copy. System backups may restore data later. Export CSV files if you need a backup you control; the app does not import CSV backups.
 
-语音内容由设备当前启用的系统语音引擎转换为文字。该引擎可能由设备厂商或第三方提供，也可能需要联网，其数据处理方式以对应语音服务的隐私政策为准。
+## Microphone and speech recognition
 
-## CSV 导出
+The app requests microphone permission when the user initiates voice input. It calls Android's selected system speech service, receives recognized text and does not implement background recording or save audio files itself. The speech provider may process audio online under its own privacy policy.
 
-用户主动导出时，旅账通过 Android 系统文件选择器将账目写入用户指定的位置。应用不会将 CSV 上传到网络。
+## CSV export
 
-## 汇率刷新
+On request, the app writes a UTF-8 CSV to the destination selected through Android's document picker. The app does not upload it. A selected document provider can be a cloud-backed location; its storage behavior is controlled by that provider and the user's selection.
 
-只有在用户主动点击管理页的汇率刷新按钮时，旅账才会联网请求公开汇率接口获取 JPY 到 CNY 的汇率。请求不包含消费项目、金额、分类或任何本地账目内容。联网失败时，应用会继续使用上次保存的汇率或默认估算值。
+## Exchange-rate refresh
 
-## 第三方服务
+Only the refresh action initiates the app's exchange-rate request to `https://open.er-api.com/v6/latest/JPY`. The request contains no ledger items, amounts or categories. The rate provider can receive normal connection metadata, such as the public IP address. On failure, the app retains the saved rate or its default estimate. The system speech service can make its own network requests.
 
-旅账不包含广告、统计、崩溃收集或用户追踪 SDK。除用户主动调用的系统语音识别服务和汇率刷新请求外，应用不接入其他第三方服务。
+## Permissions and third-party services
 
-## 权限
+- Microphone: user-initiated speech entry.
+- Internet: user-initiated exchange-rate refresh; system speech behavior is separate.
 
-- 麦克风：仅用于用户主动发起的语音记账。
-- 网络：仅用于用户主动刷新汇率。
-
-应用不申请通讯录、位置、相册或通用文件存储权限。
+The source contains no advertising, analytics, crash-reporting or tracking SDK. It requests no contacts, location, photo-library or broad storage permission. Android backup, system speech and the selected document provider have their own behavior and privacy settings.

@@ -1,29 +1,28 @@
-# 贡献指南
+[English](CONTRIBUTING.md) | [中文](CONTRIBUTING.zh-CN.md)
 
-感谢你对旅账感兴趣。Issue、功能建议、兼容性反馈和代码贡献都很欢迎。
+# Contributing
 
-## 提交 Issue
+Bug reports, compatibility feedback, feature suggestions and code contributions are welcome.
 
-请尽量包含：
+## Reporting a problem
 
-- 手机型号与 Android / HyperOS 版本
-- 旅账版本
-- 问题出现前的操作步骤
-- 实际结果与期望结果
-- 不包含私人账目信息的截图或错误日志
+Include the device model, Android or HyperOS version, app version, reproduction steps, actual behavior and expected behavior. Remove private expenses, credentials and personal details from screenshots or logs.
 
-## 提交代码
+## Code changes
 
-1. Fork 仓库并创建功能分支。
-2. 保持实现简单，避免为小功能引入大型依赖。
-3. 不要加入广告、追踪或未经说明的网络请求。
-4. 确保 `./gradlew assembleDebug lintDebug` 通过。
-5. 在 Pull Request 中说明动机、改动和验证方法。
+1. Fork the repository and create a focused branch.
+2. Keep the implementation small and avoid unnecessary runtime dependencies.
+3. Do not introduce advertising, tracking or undocumented network calls.
+4. With JDK 17 and Android SDK 35 available, run `./gradlew assembleDebug lintDebug` (Windows: `gradlew.bat assembleDebug lintDebug`). Report the exact checks actually completed.
+5. Explain the motivation, behavior change and validation in the pull request.
+6. Update English documentation and its `.zh-CN.md` companion together. The current app UI and speech configuration are Chinese; documentation language selection does not change the app's UI.
 
-## 项目原则
+## Design principles
 
-- Local first：核心记账无需账号和网络
-- Privacy by default：最少权限，不收集无关数据
-- User control：分类等主观判断交给用户
-- Minimal UI：旅行途中可以快速完成操作
-- Honest scope：清楚说明语音引擎、币种和解析限制
+- Core bookkeeping works without an account or network connection.
+- Request only the permissions needed by the feature.
+- Let users control subjective category choices.
+- Keep common travel-entry actions quick.
+- Document parsing limits, system speech behavior, Android backup and external services accurately.
+
+Source compilation alone is not an Android package build, lint run, installation test or device compatibility test. Preserve existing release assets when making documentation changes.

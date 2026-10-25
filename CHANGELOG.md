@@ -1,62 +1,54 @@
-# 更新记录
+[English](CHANGELOG.md) | [中文](CHANGELOG.zh-CN.md)
 
-## 3.0.0 - 2026-08-27
+# Changelog
 
-- 管理页增加「管理分类」，支持新增、重命名和删除消费类别
-- 分类列表保存到本机，点击账目归类时使用自定义分类
-- 重命名分类会同步更新历史记录；删除分类会将对应记录改为未分类
-- 管理页增加 JPY → CNY 汇率卡片，支持实时刷新和手动设置
-- 总额、分类小计、按天小计展示人民币折算金额
-- CSV 导出增加汇率和折合人民币列
-- 输入人民币、RMB、CNY 或「块」金额时，可按当前汇率折算为日元保存
+Version entries below describe the source history and historical release notes. As checked on 2026-10-25, the latest published release is v2.1.1; the v3.0.0 release is a draft. See the [release/source boundary](docs/releases/README.md).
 
-## 2.1.1 - 2026-08-21
+## Unreleased audit changes
 
-- 管理页增加「按类别 / 按天」视图切换
-- 按天显示今天、昨天或具体日期
-- 展示每天的消费笔数、当日合计和当天账目明细
-- 保留分类花费概览、手动归类和 CSV 导出
-- 视图切换后立即根据本地记录重新计算统计结果
+- Add English default documentation and Chinese companion pages.
+- Correct Android backup and document-provider privacy descriptions.
+- Make editable numeric values and CSV fields independent of device locale.
+- Reject non-finite amounts and rates, and recover from an invalid cached rate.
+- Clarify release status, early-tag source mismatches and APK verification limits.
 
-## 2.1.0 - 2026-08-21
+## 3.0.0 — 2026-08-27
 
-- 取消关键词自动分类
-- 新账目统一保存为「未分类」，避免饮料等消费被错误判断
-- 在管理页点击账目即可手动选择餐饮、购物、交通或其他
-- 已分类账目支持随时重新归类
-- 分类后立即重新计算分类金额、笔数与小计
-- 旧版自动分类记录在首次升级后统一重置为未分类
-- CSV 导出使用最终的手动分类结果
+- Add custom category creation, renaming and deletion, with matching-record updates.
+- Cache the category list locally and use it for manual classification.
+- Add JPY-to-CNY refresh and manual rate entry.
+- Show converted totals and add rate/CNY columns to CSV.
+- Convert recognized CNY-marked input into JPY before saving.
 
-## 2.0.0 - 2026-08-21
+## 2.1.1 — 2026-08-21
 
-- 增加分类金额概览和分类小计
-- 管理页按餐饮、购物、交通和其他分组展示记录
-- 展示每个类别的消费笔数与金额
-- 增加 UTF-8 CSV 导出，兼容 Excel 和 Numbers 中文显示
-- 通过系统文件选择器保存，无需申请文件存储权限
+- Add category/day grouping and daily counts, totals and details.
+- Retain category summaries, manual classification and CSV export.
+- Recompute the selected view from local records.
 
-## 1.1.0 - 2026-08-21
+## 2.1.0 — 2026-08-21
 
-- 改为应用内实时语音识别
-- 增加麦克风运行时权限
-- 增加正在听、正在识别和失败原因提示
-- 增加系统语音服务可用性检查
-- 增加居中挖孔屏、状态栏和底部导航栏安全区域适配
+- Replace keyword classification with manual category selection.
+- Save new entries as uncategorized and allow later reclassification.
+- Reset earlier automatic classifications once during migration.
+- Export the final manual classification.
 
-## 1.0.1 - 2026-08-21
+## 2.0.0 — 2026-08-21
 
-- 改进 HyperOS 3 启动兼容性
-- 移除容易受厂商实现影响的启动系统栏接口
-- 增加兼容模式降级界面
-- 补充系统语音服务声明
+- Add category summaries, grouped records, counts and subtotals.
+- Export UTF-8 BOM CSV using Android's document picker without broad storage permission.
 
-## 1.0.0 - 2026-08-21
+## 1.1.0 — 2026-08-21
 
-- 首个可用版本
-- 极简「记账 / 管理」双入口首页
-- 支持文字和系统语音输入
-- 在本地提取消费项目、金额和基础类别
-- 保存前展示可编辑确认信息
-- 使用本地存储保存全部账目
-- 管理页展示明细与总消费金额
+- Add in-app system speech recognition, microphone permission and recognition-state/error feedback.
+- Check speech-service availability and apply system-bar/display-cutout insets.
+
+## 1.0.1 — 2026-08-21
+
+- Adjust startup system-bar handling for HyperOS compatibility.
+- Add a safe fallback screen and system speech-service visibility declarations.
+
+## 1.0.0 — 2026-08-21
+
+- Initial Record/Manage interface with text and system speech input.
+- Parse expenses locally, confirm before saving, persist records and show totals.
